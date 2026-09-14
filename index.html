@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K-TUNGSTEN AI Virtual Office</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="brand">
+      <div class="brand-logo">K</div>
+      <div>
+        <strong>K-TUNGSTEN</strong>
+        <span>AI VIRTUAL OFFICE</span>
+      </div>
+    </div>
+
+    <nav>
+      <button class="nav-item active" data-page="dashboard">
+        <span>⌂</span> Dashboard
+      </button>
+
+      <button class="nav-item" data-page="agents">
+        <span>🤖</span> AI Xodimlar
+      </button>
+
+      <button class="nav-item" data-page="tasks">
+        <span>✓</span> Topshiriqlar
+      </button>
+
+      <button class="nav-item" data-page="files">
+        <span>▣</span> Fayllar
+      </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="system-status">
+        <i></i>
+        <div>
+          <b>Tizim faol</b>
+          <small>AI Office online</small>
+        </div>
+      </div>
+
+      <button class="settings-btn">⚙ Sozlamalar</button>
+    </div>
+
+  </aside>
+
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+
+      <div>
+        <h1 id="pageTitle">Dashboard</h1>
+        <p>K-TUNGSTEN AI Virtual Office</p>
+      </div>
+
+      <div class="top-actions">
+        <button class="icon-btn" title="Bildirishnomalar">🔔</button>
+
+        <div class="user">
+          <div class="avatar">S</div>
+          <div>
+            <b>Administrator</b>
+            <small>IT Department</small>
+          </div>
+        </div>
+      </div>
+
+    </header>
+
+
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="page active-page">
+
+      <div class="welcome">
+        <div>
+          <span class="eyebrow">AI VIRTUAL OFFICE</span>
+          <h2>Bugun qanday vazifani<br><strong>AI bilan bajaramiz?</strong></h2>
+          <p>
+            Vazifangizni yozing. AI Director uni kerakli AI xodimlarga
+            taqsimlaydi va natijani tayyorlaydi.
+          </p>
+        </div>
+
+        <div class="welcome-orb">
+          <div class="orb">AI</div>
+        </div>
+      </div>
+
+
+      <!-- AI CHAT -->
+      <div class="director-card">
+
+        <div class="director-header">
+          <div class="director-avatar">🤖</div>
+
+          <div>
+            <h3>AI Director</h3>
+            <span><i></i> Online</span>
+          </div>
+
+          <div class="director-badge">
+            Bosh AI
+          </div>
+        </div>
+
+        <div id="chat" class="chat">
+
+          <div class="message ai">
+            <div class="message-avatar">🤖</div>
+            <div class="bubble">
+              Salom! Men K-TUNGSTEN AI Directoriman.
+              Bugungi vazifangizni yozing — men uni tegishli
+              AI xodimlarga taqsimlayman.
+            </div>
+          </div>
+
+        </div>
+
+        <div class="quick-actions">
+
+          <button onclick="quickTask('Karerdagi xavfsizlik bo‘yicha taqdimot tayyorla')">
+            🦺 Xavfsizlik taqdimoti
+          </button>
+
+          <button onclick="quickTask('Yangi vakansiya uchun Instagram post tayyorla')">
+            👨‍💼 Vakansiya posti
+          </button>
+
+          <button onclick="quickTask('Excel ma’lumotlarini tahlil qil')">
+            📊 Excel tahlili
+          </button>
+
+          <button onclick="quickTask('Word hujjat tayyorla')">
+            📄 Word hujjat
+          </button>
+
+        </div>
+
+        <form class="chat-input" onsubmit="sendMessage(event)">
+
+          <label class="attach">
+            📎
+            <input type="file" id="fileInput" hidden>
+          </label>
+
+          <input
+            id="messageInput"
+            type="text"
+            placeholder="AI Director'ga topshiriq yozing..."
+            autocomplete="off"
+          >
+
+          <button type="submit">
+            ➤
+          </button>
+
+        </form>
+
+      </div>
+
+
+      <!-- STATS -->
+      <div class="stats">
+
+        <div class="stat-card">
+          <div class="stat-icon blue">🤖</div>
+          <div>
+            <span>AI xodimlar</span>
+            <strong>12</strong>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon green">✓</div>
+          <div>
+            <span>Bajarilgan</span>
+            <strong id="completedCount">24</strong>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon gold">⚡</div>
+          <div>
+            <span>Faol topshiriqlar</span>
+            <strong id="activeCount">3</strong>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon purple">▣</div>
+          <div>
+            <span>Fayllar</span>
+            <strong id="fileCount">18</strong>
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- RECENT TASKS -->
+      <div class="section-header">
+        <div>
+          <h2>So‘nggi topshiriqlar</h2>
+          <p>AI Office'dagi oxirgi ishlar</p>
+        </div>
+
+        <button class="see-all" onclick="openPage('tasks')">
+          Barchasi →
+        </button>
+      </div>
+
+      <div id="taskList" class="task-list">
+
+        <div class="task">
+          <div class="task-type safety">🦺</div>
+
+          <div class="task-info">
+            <strong>Karer xavfsizligi taqdimoti</strong>
+            <span>Safety AI • 12 daqiqa oldin</span>
+          </div>
+
+          <div class="task-status done">Bajarildi</div>
+        </div>
+
+        <div class="task">
+          <div class="task-type hr">👨‍💼</div>
+
+          <div class="task-info">
+            <strong>Santexnik vakansiyasi</strong>
+            <span>HR AI • 35 daqiqa oldin</span>
+          </div>
+
+          <div class="task-status progress">Jarayonda</div>
+        </div>
+
+        <div class="task">
+          <div class="task-type analyst">📊</div>
+
+          <div class="task-info">
+            <strong>Oylik Excel hisoboti</strong>
+            <span>Analyst AI • 1 soat oldin</span>
+          </div>
+
+          <div class="task-status waiting">Kutilmoqda</div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- AI AGENTS -->
+    <section id="agents" class="page">
+
+      <div class="section-header">
+        <div>
+          <h2>AI Xodimlar</h2>
+          <p>Virtual Office jamoasi</p>
+        </div>
+      </div>
+
+      <div class="agents-grid" id="agentsGrid"></div>
+
+    </section>
+
+
+    <!-- TASKS -->
+    <section id="tasks" class="page">
+
+      <div class="section-header">
+        <div>
+          <h2>Topshiriqlar</h2>
+          <p>Barcha AI vazifalarini boshqaring</p>
+        </div>
+
+        <button class="primary-btn" onclick="openNewTask()">
+          + Yangi topshiriq
+        </button>
+      </div>
+
+      <div class="tasks-board">
+
+        <div class="board-column">
+          <h3>⏳ Kutilmoqda</h3>
+          <div id="waitingTasks"></div>
+        </div>
+
+        <div class="board-column">
+          <h3>⚡ Jarayonda</h3>
+          <div id="progressTasks"></div>
+        </div>
+
+        <div class="board-column">
+          <h3>✓ Bajarildi</h3>
+          <div id="doneTasks"></div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- FILES -->
+    <section id="files" class="page">
+
+      <div class="section-header">
+        <div>
+          <h2>Fayllar</h2>
+          <p>Virtual Office hujjatlari</p>
+        </div>
+
+        <label class="primary-btn upload-btn">
+          + Fayl yuklash
+          <input type="file" multiple hidden onchange="handleFiles(event)">
+        </label>
+      </div>
+
+      <div class="upload-zone">
+        <div>☁️</div>
+        <h3>Fayllarni shu yerga yuklang</h3>
+        <p>PDF, Word, Excel, PowerPoint va rasmlar</p>
+      </div>
+
+      <div id="fileList" class="file-list">
+
+        <div class="file-item">
+          <div class="file-icon pdf">PDF</div>
+          <div>
+            <strong>Texnika xavfsizligi.pdf</strong>
+            <span>2.4 MB • Bugun</span>
+          </div>
+        </div>
+
+        <div class="file-item">
+          <div class="file-icon excel">XLS</div>
+          <div>
+            <strong>Oylik hisobot.xlsx</strong>
+            <span>1.8 MB • Kecha</span>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<!-- NEW TASK MODAL -->
+<div id="modal" class="modal">
+
+  <div class="modal-box">
+
+    <button class="close" onclick="closeModal()">×</button>
+
+    <h2>Yangi topshiriq</h2>
+    <p>AI Director'ga vazifani bering.</p>
+
+    <textarea
+      id="modalTask"
+      placeholder="Masalan: Karerdagi yo‘l harakati xavfsizligi bo‘yicha taqdimot tayyorla..."
+    ></textarea>
+
+    <button class="primary-btn full" onclick="createTask()">
+      🚀 Topshiriqni boshlash
+    </button>
+
+  </div>
+
+</div>
+
+
+<script src="app.js"></script>
+
+</body>
+</html>
