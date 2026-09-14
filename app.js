@@ -1,906 +1,1964 @@
-/* =====================================================
+````javascript
+/* =========================================================
    K-TUNGSTEN AI VIRTUAL OFFICE
-   FRONTEND MVP
-===================================================== */
+   FRONTEND APPLICATION
+   Real AI API + AI Director
+   ========================================================= */
 
+
+/* =========================================================
+   GLOBAL STATE
+   ========================================================= */
+
+window.currentAgent = "director";
+
+window.chatHistory = [];
+
+let selectedFiles = [];
+
+let tasks = [];
+
+let isSending = false;
+
+
+/* =========================================================
+   AI AGENTS
+   ========================================================= */
 
 const agents = {
 
-  director: {
-    name: "AI Director",
-    icon: "🤖",
-    description: "Barcha AI xodimlarni boshqaradi.",
-    color: "blue"
-  },
+    director: {
+        name: "AI Director",
+        icon: "👨‍💼",
+        description: "Barcha AI xodimlarini boshqaradi va topshiriqni kerakli mutaxassisga beradi."
+    },
 
-  it: {
-    name: "IT Specialist",
-    icon: "💻",
-    description: "IT, kompyuter va tarmoq masalalari.",
-    color: "blue"
-  },
+    it: {
+        name: "IT Specialist",
+        icon: "💻",
+        description: "Kompyuterlar, tarmoqlar, GPS, kameralar, printerlar va IT infratuzilmasi."
+    },
 
-  analyst: {
-    name: "Analyst AI",
-    icon: "📊",
-    description: "Excel va ma'lumotlarni tahlil qiladi.",
-    color: "green"
-  },
+    analyst: {
+        name: "Analyst AI",
+        icon: "📊",
+        description: "Excel, jadval, statistika va ma'lumotlarni tahlil qiladi."
+    },
 
-  document: {
-    name: "Document AI",
-    icon: "📄",
-    description: "Word va professional hujjatlar.",
-    color: "purple"
-  },
+    document: {
+        name: "Document AI",
+        icon: "📄",
+        description: "Rasmiy hujjatlar, xatlar, hisobotlar va hujjatlarni tayyorlaydi."
+    },
 
-  designer: {
-    name: "Designer AI",
-    icon: "🎨",
-    description: "Banner, poster va grafik dizayn.",
-    color: "purple"
-  },
+    designer: {
+        name: "Designer AI",
+        icon: "🎨",
+        description: "Banner, poster, Instagram va boshqa dizaynlar uchun g'oyalar beradi."
+    },
 
-  presentation: {
-    name: "Presentation AI",
-    icon: "📽️",
-    description: "Professional PowerPoint taqdimotlar.",
-    color: "gold"
-  },
+    presentation: {
+        name: "Presentation AI",
+        icon: "📽️",
+        description: "PowerPoint va boshqa taqdimotlar strukturasi va matnlarini tayyorlaydi."
+    },
 
-  hr: {
-    name: "HR AI",
-    icon: "👨‍💼",
-    description: "Vakansiya va HR jarayonlari.",
-    color: "blue"
-  },
+    hr: {
+        name: "HR AI",
+        icon: "👥",
+        description: "Vakansiya, ish e'loni, HR va xodimlar bilan bog'liq ishlar."
+    },
 
-  safety: {
-    name: "Safety AI",
-    icon: "🦺",
-    description: "Mehnat va sanoat xavfsizligi.",
-    color: "gold"
-  },
+    safety: {
+        name: "Safety AI",
+        icon: "🦺",
+        description: "Mehnat xavfsizligi, sanoat xavfsizligi va karer xavfsizligi."
+    },
 
-  research: {
-    name: "Research AI",
-    icon: "🌐",
-    description: "Internet va ma'lumot izlash.",
-    color: "blue"
-  },
+    research: {
+        name: "Research AI",
+        icon: "🔎",
+        description: "Tadqiqot, yangi texnologiyalar va ma'lumot izlash."
+    },
 
-  translator: {
-    name: "Translator AI",
-    icon: "🌍",
-    description: "O‘zbek, rus va ingliz tillari.",
-    color: "green"
-  },
+    translator: {
+        name: "Translator AI",
+        icon: "🌐",
+        description: "O'zbek, rus va ingliz tillariga tarjima."
+    },
 
-  developer: {
-    name: "Developer AI",
-    icon: "👨‍💻",
-    description: "Kod, sayt va dasturlar.",
-    color: "blue"
-  },
+    developer: {
+        name: "Developer AI",
+        icon: "👨‍💻",
+        description: "HTML, CSS, JavaScript, API, backend va dasturlash."
+    },
 
-  automation: {
-    name: "Automation AI",
-    icon: "⚙️",
-    description: "Takroriy ishlarni avtomatlashtiradi.",
-    color: "gold"
-  }
+    automation: {
+        name: "Automation AI",
+        icon: "⚙️",
+        description: "Takroriy ishlarni avtomatlashtirish va workflow yaratish."
+    }
 
 };
 
 
-let selectedAgent = "director";
-let taskTotal = 3;
-let completed = 27;
-
-
-/* =====================================================
-   INITIALIZE
-===================================================== */
+/* =========================================================
+   INITIALIZATION
+   ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  renderAgents();
-
-  renderChatAgents();
-
-  loadTheme();
-
-  document.addEventListener("keydown", keyboardShortcuts);
+    initializeOffice();
 
 });
 
 
-/* =====================================================
-   DASHBOARD AGENTS
-===================================================== */
+function initializeOffice() {
+
+    renderAgents();
+
+    setupNavigation();
+
+    setupChat();
+
+    setupModal();
+
+    setupSearch();
+
+    setupTheme();
+
+    setupMobileMenu();
+
+    setupKeyboardShortcuts();
+
+    setupFileUpload();
+
+    loadSavedData();
+
+    updateDashboard();
+
+}
+
+
+/* =========================================================
+   AGENTS
+   ========================================================= */
 
 function renderAgents() {
 
-  const grid = document.getElementById("agentsGrid");
+    const container =
+        document.querySelector("#agentGrid") ||
+        document.querySelector(".agent-grid") ||
+        document.querySelector("[data-agent-grid]");
 
-  if (!grid) return;
+    if (!container) return;
 
-  const keys = Object.keys(agents);
+    container.innerHTML = "";
 
-  grid.innerHTML = keys.map(key => {
+    Object.entries(agents).forEach(([id, agent]) => {
 
-    const a = agents[key];
+        const card = document.createElement("div");
 
-    return `
-      <div class="agent-card" onclick="selectAgent('${key}')">
+        card.className = "agent-card";
 
-        <div class="agent-top">
+        card.dataset.agent = id;
 
-          <div class="agent-icon">
-            ${a.icon}
-          </div>
+        card.innerHTML = `
 
-          <div class="agent-status"></div>
+            <div class="agent-icon">
+                ${agent.icon}
+            </div>
 
-        </div>
+            <div class="agent-info">
 
-        <h3>${a.name}</h3>
+                <h3>
+                    ${escapeHtml(agent.name)}
+                </h3>
 
-        <p>${a.description}</p>
+                <p>
+                    ${escapeHtml(agent.description)}
+                </p>
 
-      </div>
-    `;
+            </div>
 
-  }).join("");
+        `;
 
-}
+        card.addEventListener("click", () => {
 
+            selectAgent(id);
 
-/* =====================================================
-   CHAT AGENTS
-===================================================== */
+        });
 
-function renderChatAgents() {
+        container.appendChild(card);
 
-  const list = document.getElementById("chatAgentList");
-
-  if (!list) return;
-
-  list.innerHTML = Object.keys(agents).map(key => {
-
-    const a = agents[key];
-
-    return `
-      <div
-        class="chat-agent ${key === selectedAgent ? "selected" : ""}"
-        onclick="selectAgent('${key}')"
-      >
-
-        <div class="chat-agent-icon">
-          ${a.icon}
-        </div>
-
-        <div class="chat-agent-info">
-          <strong>${a.name}</strong>
-          <span>${a.description}</span>
-        </div>
-
-        <div class="chat-online"></div>
-
-      </div>
-    `;
-
-  }).join("");
+    });
 
 }
 
 
-/* =====================================================
-   SELECT AI AGENT
-===================================================== */
+/* =========================================================
+   SELECT AGENT
+   ========================================================= */
 
-function selectAgent(key) {
+function selectAgent(agentId) {
 
-  if (!agents[key]) return;
+    if (!agents[agentId]) {
 
-  selectedAgent = key;
+        agentId = "director";
 
-  showPage("chat");
+    }
 
-  updateChatAgent();
+    window.currentAgent = agentId;
 
-  renderChatAgents();
-
-}
+    const agent = agents[agentId];
 
 
-function updateChatAgent() {
+    /*
+    Highlight selected agent
+    */
 
-  const agent = agents[selectedAgent];
+    document
+        .querySelectorAll(".agent-card")
+        .forEach(card => {
 
-  document.getElementById("chatIcon").textContent = agent.icon;
+            card.classList.toggle(
+                "active",
+                card.dataset.agent === agentId
+            );
 
-  document.getElementById("chatName").textContent = agent.name;
-
-  const messages = document.getElementById("messages");
-
-  messages.innerHTML = `
-    <div class="message ai-message">
-
-      <div class="message-avatar">
-        ${agent.icon}
-      </div>
-
-      <div>
-
-        <div class="message-name">
-          ${agent.name}
-        </div>
-
-        <div class="bubble">
-          Salom! Men <strong>${agent.name}</strong>man. 👋
-          <br><br>
-          ${agent.description}
-          <br><br>
-          Menga topshiriq bering.
-        </div>
-
-        <small>Hozir</small>
-
-      </div>
-
-    </div>
-  `;
-
-}
+        });
 
 
-/* =====================================================
-   PAGE NAVIGATION
-===================================================== */
+    /*
+    Update selected agent labels
+    */
 
-function showPage(pageId, clickedButton = null) {
+    document
+        .querySelectorAll("[data-current-agent]")
+        .forEach(element => {
 
-  document.querySelectorAll(".page").forEach(page => {
-    page.classList.remove("active-page");
-  });
+            element.textContent = agent.name;
 
-  const page = document.getElementById(pageId);
+        });
 
-  if (page) {
-    page.classList.add("active-page");
-  }
 
-  document.querySelectorAll(".nav-item").forEach(item => {
-    item.classList.remove("active");
-  });
+    /*
+    Open chat
+    */
 
-  if (clickedButton) {
-    clickedButton.classList.add("active");
-  }
+    showPage("chat");
 
-  if (pageId === "dashboard") {
-    document.querySelectorAll(".nav-item")[1]?.classList.add("active");
-  }
 
-  if (pageId === "chat") {
-    document.querySelectorAll(".nav-item")[2]?.classList.add("active");
-  }
+    /*
+    Welcome message
+    */
 
-  if (pageId === "tasks") {
-    document.querySelectorAll(".nav-item")[3]?.classList.add("active");
-  }
+    const chatMessages =
+        document.querySelector("#chatMessages") ||
+        document.querySelector(".chat-messages");
 
-  if (pageId === "files") {
-    document.querySelectorAll(".nav-item")[4]?.classList.add("active");
-  }
+    if (
+        chatMessages &&
+        chatMessages.children.length === 0
+    ) {
 
-  closeMobileSidebar();
+        addChatMessage(
+            "assistant",
+            `${agent.icon} <strong>${agent.name}</strong> ishga tayyor. Vazifangizni yozing.`
+        );
+
+    }
 
 }
 
 
-/* =====================================================
-   NEW TASK
-===================================================== */
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
 
-function newTask() {
+function setupNavigation() {
 
-  document.getElementById("modal").classList.add("open");
+    document
+        .querySelectorAll("[data-page]")
+        .forEach(button => {
 
-  setTimeout(() => {
-    document.getElementById("taskInput").focus();
-  }, 100);
+            button.addEventListener("click", () => {
 
-}
+                const page =
+                    button.dataset.page;
 
+                showPage(page);
 
-function closeModal() {
+            });
 
-  document.getElementById("modal").classList.remove("open");
-
-}
+        });
 
 
-/* =====================================================
-   CREATE TASK
-===================================================== */
+    /*
+    Old-style navigation buttons
+    */
 
-function createTask() {
+    document
+        .querySelectorAll(".nav-item")
+        .forEach(item => {
 
-  const input = document.getElementById("taskInput");
+            item.addEventListener("click", () => {
 
-  const task = input.value.trim();
+                const page =
+                    item.dataset.page ||
+                    item.getAttribute("data-target");
 
-  const agent = document.getElementById("taskAgent").value;
+                if (page) {
 
-  if (!task) {
+                    showPage(page);
 
-    showToast("Avval topshiriqni yozing.");
+                }
 
-    input.focus();
+            });
 
-    return;
-
-  }
-
-  taskTotal++;
-
-  document.getElementById("taskCount").textContent = taskTotal;
-
-  document.getElementById("activeStat").textContent = taskTotal;
-
-  closeModal();
-
-  input.value = "";
-
-  showToast(
-    `${agents[agent].name} topshiriqni qabul qildi ✓`
-  );
-
-  setTimeout(() => {
-
-    selectAgent(agent);
-
-    document.getElementById("chatInput").value = task;
-
-    sendMessage();
-
-  }, 500);
+        });
 
 }
 
 
-/* =====================================================
-   QUICK TASK
-===================================================== */
+function showPage(page) {
 
-function quickTask(text) {
+    document
+        .querySelectorAll(".page")
+        .forEach(section => {
 
-  document.getElementById("modal").classList.add("open");
+            section.classList.remove("active");
 
-  document.getElementById("taskInput").value = text;
+        });
+
+
+    const target =
+        document.getElementById(page) ||
+        document.querySelector(`[data-page-content="${page}"]`);
+
+    if (target) {
+
+        target.classList.add("active");
+
+    }
+
+
+    /*
+    Navigation active state
+    */
+
+    document
+        .querySelectorAll("[data-page], .nav-item")
+        .forEach(item => {
+
+            const itemPage =
+                item.dataset.page ||
+                item.getAttribute("data-target");
+
+            item.classList.toggle(
+                "active",
+                itemPage === page
+            );
+
+        });
+
+
+    /*
+    Mobile sidebar close
+    */
+
+    closeMobileMenu();
 
 }
 
 
-/* =====================================================
+/* =========================================================
    CHAT
-===================================================== */
+   ========================================================= */
+
+function setupChat() {
+
+    const input =
+        document.querySelector("#chatInput") ||
+        document.querySelector("textarea[name='message']") ||
+        document.querySelector(".chat-input textarea");
+
+    const sendButton =
+        document.querySelector("#sendMessage") ||
+        document.querySelector("#sendBtn") ||
+        document.querySelector(".send-btn");
+
+
+    if (input) {
+
+        input.addEventListener(
+            "keydown",
+            handleEnter
+        );
+
+    }
+
+
+    if (sendButton) {
+
+        sendButton.addEventListener(
+            "click",
+            sendMessage
+        );
+
+    }
+
+}
+
 
 function handleEnter(event) {
 
-  if (event.key === "Enter") {
+    if (
+        event.key === "Enter" &&
+        !event.shiftKey
+    ) {
 
-    event.preventDefault();
+        event.preventDefault();
+
+        sendMessage();
+
+    }
+
+}
+
+
+/* =========================================================
+   REAL AI REQUEST
+   ========================================================= */
+
+async function sendMessage() {
+
+    if (isSending) return;
+
+
+    const input =
+        document.querySelector("#chatInput") ||
+        document.querySelector("textarea[name='message']") ||
+        document.querySelector(".chat-input textarea");
+
+
+    if (!input) {
+
+        showToast(
+            "Chat input topilmadi.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const message =
+        input.value.trim();
+
+
+    if (!message) return;
+
+
+    /*
+    USER MESSAGE
+    */
+
+    addChatMessage(
+        "user",
+        escapeHtml(message)
+    );
+
+
+    input.value = "";
+
+
+    /*
+    Disable sending
+    */
+
+    isSending = true;
+
+
+    /*
+    Loading message
+    */
+
+    const loadingId =
+        "ai-loading-" + Date.now();
+
+
+    addChatMessage(
+        "assistant",
+        `
+        <div id="${loadingId}" class="ai-loading">
+            <span>AI o'ylayapti</span>
+            <span class="loading-dots">...</span>
+        </div>
+        `
+    );
+
+
+    try {
+
+        /*
+        Send last 12 messages
+        */
+
+        const history =
+            window.chatHistory
+                .slice(-12);
+
+
+        /*
+        API
+        */
+
+        const response =
+            await fetch(
+                "/api/chat",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        message,
+
+                        agent:
+                            window.currentAgent ||
+                            "director",
+
+                        history
+
+                    })
+
+                }
+            );
+
+
+        /*
+        Parse response
+        */
+
+        const data =
+            await response.json();
+
+
+        /*
+        API error
+        */
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.error ||
+                "Server xatosi"
+            );
+
+        }
+
+
+        /*
+        Save history
+        */
+
+        window.chatHistory.push({
+
+            role: "user",
+
+            content: message
+
+        });
+
+
+        window.chatHistory.push({
+
+            role: "assistant",
+
+            content: data.answer
+
+        });
+
+
+        /*
+        Limit history
+        */
+
+        if (
+            window.chatHistory.length > 20
+        ) {
+
+            window.chatHistory =
+                window.chatHistory.slice(-20);
+
+        }
+
+
+        /*
+        Remove loading
+        */
+
+        const loading =
+            document.getElementById(
+                loadingId
+            );
+
+
+        if (loading) {
+
+            loading.outerHTML =
+                formatAIResponse(
+                    data.answer
+                );
+
+        }
+
+
+        /*
+        AI Director selected agent
+        */
+
+        if (
+            data.agent &&
+            data.agent.id
+        ) {
+
+            showAgentNotification(
+                data.agent
+            );
+
+        }
+
+
+        /*
+        Update dashboard
+        */
+
+        updateDashboard();
+
+
+    } catch (error) {
+
+        console.error(
+            "AI ERROR:",
+            error
+        );
+
+
+        const loading =
+            document.getElementById(
+                loadingId
+            );
+
+
+        if (loading) {
+
+            loading.outerHTML = `
+
+                <div class="ai-error">
+
+                    ❌ <strong>AI bilan aloqa xatosi</strong>
+
+                    <br><br>
+
+                    ${escapeHtml(
+                        error.message
+                    )}
+
+                </div>
+
+            `;
+
+        }
+
+
+        showToast(
+            "AI serverida xatolik yuz berdi.",
+            "error"
+        );
+
+
+    } finally {
+
+        isSending = false;
+
+    }
+
+}
+
+
+/* =========================================================
+   ADD CHAT MESSAGE
+   ========================================================= */
+
+function addChatMessage(
+    type,
+    content
+) {
+
+    const container =
+        document.querySelector("#chatMessages") ||
+        document.querySelector(".chat-messages");
+
+
+    if (!container) return;
+
+
+    const message =
+        document.createElement("div");
+
+
+    message.className =
+        `chat-message ${type}`;
+
+
+    if (type === "user") {
+
+        message.innerHTML = `
+
+            <div class="message-content">
+
+                ${content}
+
+            </div>
+
+        `;
+
+    } else {
+
+        message.innerHTML = `
+
+            <div class="message-avatar">
+                🤖
+            </div>
+
+            <div class="message-content">
+
+                ${content}
+
+            </div>
+
+        `;
+
+    }
+
+
+    container.appendChild(message);
+
+
+    /*
+    Scroll bottom
+    */
+
+    container.scrollTop =
+        container.scrollHeight;
+
+}
+
+
+/* =========================================================
+   FORMAT AI RESPONSE
+   ========================================================= */
+
+function formatAIResponse(text) {
+
+    if (!text) {
+
+        return `
+            <div class="chat-message assistant">
+                AI javob qaytarmadi.
+            </div>
+        `;
+
+    }
+
+
+    let result =
+        escapeHtml(text);
+
+
+    /*
+    Code blocks
+    */
+
+    result =
+        result.replace(
+            /```([\s\S]*?)```/g,
+            `
+            <pre class="code-block"><code>$1</code></pre>
+            `
+        );
+
+
+    /*
+    Bold
+    */
+
+    result =
+        result.replace(
+            /\*\*(.*?)\*\*/g,
+            "<strong>$1</strong>"
+        );
+
+
+    /*
+    Bullet points
+    */
+
+    result =
+        result.replace(
+            /^\s*[-•]\s(.+)$/gm,
+            "<li>$1</li>"
+        );
+
+
+    /*
+    New lines
+    */
+
+    result =
+        result.replace(
+            /\n/g,
+            "<br>"
+        );
+
+
+    return `
+
+        <div class="chat-message assistant">
+
+            <div class="message-avatar">
+                🤖
+            </div>
+
+            <div class="message-content">
+
+                ${result}
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+   AGENT NOTIFICATION
+   ========================================================= */
+
+function showAgentNotification(agent) {
+
+    if (!agent || !agent.name) return;
+
+
+    showToast(
+        `AI Director: ${agent.name} tanlandi.`,
+        "success"
+    );
+
+}
+
+
+/* =========================================================
+   NEW TASK
+   ========================================================= */
+
+function newTask() {
+
+    const modal =
+        document.querySelector("#taskModal") ||
+        document.querySelector(".modal");
+
+
+    if (!modal) {
+
+        showPage("tasks");
+
+        return;
+
+    }
+
+
+    modal.classList.add("active");
+
+}
+
+
+/* =========================================================
+   CLOSE MODAL
+   ========================================================= */
+
+function closeModal() {
+
+    document
+        .querySelectorAll(".modal")
+        .forEach(modal => {
+
+            modal.classList.remove("active");
+
+        });
+
+}
+
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+function setupModal() {
+
+    document
+        .querySelectorAll(
+            "[data-close-modal], .modal-close"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                closeModal
+            );
+
+        });
+
+
+    document
+        .querySelectorAll(".modal")
+        .forEach(modal => {
+
+            modal.addEventListener(
+                "click",
+                event => {
+
+                    if (
+                        event.target === modal
+                    ) {
+
+                        closeModal();
+
+                    }
+
+                }
+            );
+
+        });
+
+
+    const createButton =
+        document.querySelector(
+            "#createTask"
+        );
+
+
+    if (createButton) {
+
+        createButton.addEventListener(
+            "click",
+            createTask
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CREATE TASK
+   ========================================================= */
+
+function createTask() {
+
+    const titleInput =
+        document.querySelector(
+            "#taskTitle"
+        ) ||
+        document.querySelector(
+            "input[name='taskTitle']"
+        );
+
+
+    const descriptionInput =
+        document.querySelector(
+            "#taskDescription"
+        ) ||
+        document.querySelector(
+            "textarea[name='taskDescription']"
+        );
+
+
+    const agentInput =
+        document.querySelector(
+            "#taskAgent"
+        ) ||
+        document.querySelector(
+            "select[name='taskAgent']"
+        );
+
+
+    const title =
+        titleInput?.value.trim() ||
+        "Yangi topshiriq";
+
+
+    const description =
+        descriptionInput?.value.trim() ||
+        "";
+
+
+    const agent =
+        agentInput?.value ||
+        "director";
+
+
+    const task = {
+
+        id:
+            Date.now(),
+
+        title,
+
+        description,
+
+        agent,
+
+        status:
+            "Jarayonda",
+
+        created:
+            new Date()
+                .toLocaleString("uz-UZ")
+
+    };
+
+
+    tasks.unshift(task);
+
+
+    saveTasks();
+
+    renderTasks();
+
+    closeModal();
+
+
+    /*
+    Open chat
+    */
+
+    window.currentAgent = agent;
+
+    showPage("chat");
+
+
+    /*
+    Put task into chat
+    */
+
+    const input =
+        document.querySelector(
+            "#chatInput"
+        );
+
+
+    if (input) {
+
+        input.value =
+            `${title}\n${description}`;
+
+        input.focus();
+
+    }
+
+
+    showToast(
+        "Topshiriq yaratildi.",
+        "success"
+    );
+
+}
+
+
+/* =========================================================
+   QUICK TASK
+   ========================================================= */
+
+function quickTask(
+    text,
+    agent = "director"
+) {
+
+    window.currentAgent = agent;
+
+
+    showPage("chat");
+
+
+    const input =
+        document.querySelector(
+            "#chatInput"
+        );
+
+
+    if (input) {
+
+        input.value = text;
+
+        input.focus();
+
+    }
+
 
     sendMessage();
 
-  }
+}
+
+
+/* =========================================================
+   TASKS
+   ========================================================= */
+
+function renderTasks() {
+
+    const container =
+        document.querySelector(
+            "#taskList"
+        ) ||
+        document.querySelector(
+            ".task-list"
+        );
+
+
+    if (!container) return;
+
+
+    container.innerHTML = "";
+
+
+    if (tasks.length === 0) {
+
+        container.innerHTML = `
+
+            <div class="empty-state">
+
+                Hozircha topshiriqlar yo'q.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    tasks.forEach(task => {
+
+        const agent =
+            agents[task.agent] ||
+            agents.director;
+
+
+        const item =
+            document.createElement("div");
+
+
+        item.className =
+            "task-item";
+
+
+        item.innerHTML = `
+
+            <div class="task-icon">
+                ${agent.icon}
+            </div>
+
+            <div class="task-info">
+
+                <h4>
+                    ${escapeHtml(task.title)}
+                </h4>
+
+                <p>
+                    ${escapeHtml(task.description)}
+                </p>
+
+                <small>
+                    ${escapeHtml(task.created)}
+                </small>
+
+            </div>
+
+            <div class="task-status">
+                ${escapeHtml(task.status)}
+            </div>
+
+        `;
+
+
+        container.appendChild(item);
+
+    });
 
 }
 
 
-function sendMessage() {
+/* =========================================================
+   FILE UPLOAD
+   ========================================================= */
 
-  const input = document.getElementById("chatInput");
+function setupFileUpload() {
 
-  const text = input.value.trim();
-
-  if (!text) return;
-
-  const messages = document.getElementById("messages");
-
-  const agent = agents[selectedAgent];
-
-  messages.insertAdjacentHTML(
-    "beforeend",
-    `
-    <div class="message user-message">
-
-      <div class="message-content">
-
-        <div class="bubble">
-          ${escapeHTML(text)}
-        </div>
-
-        <small>Hozir</small>
-
-      </div>
-
-    </div>
-    `
-  );
-
-  input.value = "";
-
-  messages.scrollTop = messages.scrollHeight;
+    const input =
+        document.querySelector(
+            "#fileInput"
+        );
 
 
-  /* DEMO AI RESPONSE */
+    const zone =
+        document.querySelector(
+            "#uploadZone"
+        ) ||
+        document.querySelector(
+            ".upload-zone"
+        );
 
-  setTimeout(() => {
 
-    const response = generateDemoResponse(text, selectedAgent);
+    if (!input) return;
 
-    messages.insertAdjacentHTML(
-      "beforeend",
-      `
-      <div class="message ai-message">
 
-        <div class="message-avatar">
-          ${agent.icon}
-        </div>
+    input.addEventListener(
+        "change",
+        event => {
 
-        <div>
+            handleFiles(
+                event.target.files
+            );
 
-          <div class="message-name">
-            ${agent.name}
-          </div>
-
-          <div class="bubble">
-            ${response}
-          </div>
-
-          <small>Hozir</small>
-
-        </div>
-
-      </div>
-      `
+        }
     );
 
-    messages.scrollTop = messages.scrollHeight;
 
-  }, 800);
+    if (zone) {
 
-}
+        zone.addEventListener(
+            "dragover",
+            event => {
+
+                event.preventDefault();
+
+                zone.classList.add(
+                    "dragging"
+                );
+
+            }
+        );
 
 
-/* =====================================================
-   DEMO AI RESPONSES
-===================================================== */
+        zone.addEventListener(
+            "dragleave",
+            () => {
 
-function generateDemoResponse(text, agent) {
+                zone.classList.remove(
+                    "dragging"
+                );
 
-  const lower = text.toLowerCase();
+            }
+        );
 
-  if (agent === "director") {
 
-    return `
-      Topshiriqni qabul qildim. 🤖
-      <br><br>
-      Men uni tahlil qilib, kerakli AI xodimlarga
-      taqsimlayman.
-      <br><br>
-      <strong>Keyingi bosqich:</strong> real AI API
-      ulangandan so‘ng bu jarayon avtomatik bajariladi.
-    `;
+        zone.addEventListener(
+            "drop",
+            event => {
 
-  }
+                event.preventDefault();
 
-  if (agent === "it") {
+                zone.classList.remove(
+                    "dragging"
+                );
 
-    return `
-      IT Specialist topshirig‘ingizni qabul qildi. 💻
-      <br><br>
-      Muammoni aniqlash uchun qurilma, operatsion
-      tizim yoki tarmoq ma'lumotlarini yuboring.
-    `;
+                handleFiles(
+                    event.dataTransfer.files
+                );
 
-  }
+            }
+        );
 
-  if (agent === "analyst") {
-
-    return `
-      📊 Excel yoki CSV faylini yuklang.
-      <br><br>
-      Men jadvalni tahlil qilish, formulalarni
-      tekshirish va hisobot tayyorlash jarayonini
-      boshlashga tayyorman.
-    `;
-
-  }
-
-  if (agent === "document") {
-
-    return `
-      📄 Hujjatni tayyorlashga tayyorman.
-      <br><br>
-      Word hujjati, buyruq, ariza, xizmat xati
-      yoki boshqa rasmiy hujjat formatini
-      tayyorlash mumkin.
-    `;
-
-  }
-
-  if (agent === "designer") {
-
-    return `
-      🎨 Dizayn topshirig‘i qabul qilindi.
-      <br><br>
-      Banner, A4 e'lon, Instagram post yoki
-      boshqa grafik material uchun brief tayyor.
-    `;
-
-  }
-
-  if (agent === "presentation") {
-
-    return `
-      📽️ Taqdimot strukturasini tayyorlashga tayyorman.
-      <br><br>
-      Mavzu, auditoriya va kerakli rasmlarni
-      yuborsangiz, slaydlar ketma-ketligini tuzaman.
-    `;
-
-  }
-
-  if (agent === "hr") {
-
-    return `
-      👨‍💼 HR topshirig‘i qabul qilindi.
-      <br><br>
-      Vakansiya, ish e'loni, lavozim tavsifi
-      yoki HR hujjatini tayyorlash mumkin.
-    `;
-
-  }
-
-  if (agent === "safety") {
-
-    return `
-      🦺 Safety AI topshirig‘ingizni qabul qildi.
-      <br><br>
-      Xavfsizlik bo‘yicha material, yo‘riqnoma,
-      checklist yoki o‘quv taqdimoti tayyorlash
-      mumkin.
-    `;
-
-  }
-
-  if (agent === "research") {
-
-    return `
-      🌐 Research AI tayyor.
-      <br><br>
-      Real web-search integratsiyasi ulanganda
-      kerakli ma'lumotlarni internetdan topib,
-      manbalar bilan qaytaraman.
-    `;
-
-  }
-
-  if (agent === "translator") {
-
-    return `
-      🌍 Tarjima qilishga tayyorman.
-      <br><br>
-      O‘zbekcha, Русский yoki English matnni
-      yuboring.
-    `;
-
-  }
-
-  if (agent === "developer") {
-
-    return `
-      👨‍💻 Developer AI tayyor.
-      <br><br>
-      HTML, CSS, JavaScript, Python va boshqa
-      texnologiyalar bo‘yicha kod yozish yoki
-      mavjud kodni tuzatish mumkin.
-    `;
-
-  }
-
-  if (agent === "automation") {
-
-    return `
-      ⚙️ Automation AI topshirig‘ini qabul qildi.
-      <br><br>
-      Takroriy ishlarni avtomatlashtirish uchun
-      jarayonni bosqichma-bosqich ishlab chiqamiz.
-    `;
-
-  }
-
-  return `
-    Topshiriq qabul qilindi. 🤖
-    <br><br>
-    Real AI backend ulangandan so‘ng men bu
-    topshiriqni to‘liq bajaraman.
-  `;
+    }
 
 }
 
 
-/* =====================================================
-   FILE HANDLING
-===================================================== */
+function handleFiles(fileList) {
 
-function handleFile(input) {
-
-  if (!input.files.length) return;
-
-  const file = input.files[0];
-
-  document.getElementById("attachmentPreview").textContent =
-    `📎 ${file.name}`;
-
-  showToast(`${file.name} tanlandi.`);
-
-}
+    if (!fileList) return;
 
 
-function uploadOfficeFile(input) {
+    Array.from(fileList)
+        .forEach(file => {
 
-  if (!input.files.length) return;
+            selectedFiles.push(file);
 
-  const file = input.files[0];
+            showToast(
+                `${file.name} yuklandi.`,
+                "success"
+            );
 
-  const size = formatBytes(file.size);
+        });
 
-  const extension =
-    file.name.split(".").pop().toUpperCase();
 
-  const list = document.getElementById("fileList");
-
-  list.insertAdjacentHTML(
-    "afterbegin",
-    `
-      <div class="file-item">
-
-        <div class="file-icon">
-          ${extension.substring(0, 4)}
-        </div>
-
-        <div>
-          <strong>${escapeHTML(file.name)}</strong>
-          <span>Yuklandi · ${size}</span>
-        </div>
-
-        <button>⋮</button>
-
-      </div>
-    `
-  );
-
-  showToast("Fayl Virtual Office'ga qo‘shildi ✓");
+    renderFiles();
 
 }
 
 
-/* =====================================================
+/* =========================================================
+   FILE LIST
+   ========================================================= */
+
+function renderFiles() {
+
+    const container =
+        document.querySelector(
+            "#fileList"
+        ) ||
+        document.querySelector(
+            ".file-list"
+        );
+
+
+    if (!container) return;
+
+
+    container.innerHTML = "";
+
+
+    selectedFiles.forEach(
+        (file, index) => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.className =
+                "file-item";
+
+
+            item.innerHTML = `
+
+                <div class="file-icon">
+                    📄
+                </div>
+
+                <div class="file-info">
+
+                    <strong>
+                        ${escapeHtml(file.name)}
+                    </strong>
+
+                    <small>
+                        ${formatFileSize(
+                            file.size
+                        )}
+                    </small>
+
+                </div>
+
+                <button
+                    class="file-remove"
+                    data-index="${index}"
+                >
+                    ×
+                </button>
+
+            `;
+
+
+            container.appendChild(item);
+
+        }
+    );
+
+
+    container
+        .querySelectorAll(
+            ".file-remove"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const index =
+                        Number(
+                            button.dataset.index
+                        );
+
+                    selectedFiles.splice(
+                        index,
+                        1
+                    );
+
+                    renderFiles();
+
+                }
+            );
+
+        });
+
+}
+
+
+/* =========================================================
    SEARCH
-===================================================== */
+   ========================================================= */
 
-function globalSearch(value) {
+function setupSearch() {
 
-  if (!value.trim()) return;
+    const searchInput =
+        document.querySelector(
+            "#globalSearch"
+        ) ||
+        document.querySelector(
+            ".global-search input"
+        );
 
-  const query = value.toLowerCase();
 
-  const found = Object.keys(agents).find(key => {
+    if (!searchInput) return;
 
-    return (
-      agents[key].name.toLowerCase().includes(query) ||
-      agents[key].description.toLowerCase().includes(query)
+
+    searchInput.addEventListener(
+        "input",
+        event => {
+
+            const query =
+                event.target.value
+                    .toLowerCase()
+                    .trim();
+
+
+            document
+                .querySelectorAll(
+                    ".agent-card, .task-item"
+                )
+                .forEach(item => {
+
+                    const text =
+                        item.textContent
+                            .toLowerCase();
+
+
+                    item.style.display =
+                        !query ||
+                        text.includes(query)
+                            ? ""
+                            : "none";
+
+                });
+
+        }
     );
-
-  });
-
-  if (found) {
-
-    selectAgent(found);
-
-  }
 
 }
 
 
-/* =====================================================
+/* =========================================================
    THEME
-===================================================== */
+   ========================================================= */
+
+function setupTheme() {
+
+    const savedTheme =
+        localStorage.getItem(
+            "kt_theme"
+        );
+
+
+    if (savedTheme === "light") {
+
+        document.body.classList.add(
+            "light"
+        );
+
+    }
+
+
+    document
+        .querySelectorAll(
+            "#themeToggle, .theme-toggle"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                toggleTheme
+            );
+
+        });
+
+}
+
 
 function toggleTheme() {
 
-  document.body.classList.toggle("light");
-
-  localStorage.setItem(
-    "officeTheme",
-    document.body.classList.contains("light")
-      ? "light"
-      : "dark"
-  );
-
-}
-
-
-function loadTheme() {
-
-  const theme = localStorage.getItem("officeTheme");
-
-  if (theme === "light") {
-
-    document.body.classList.add("light");
-
-  }
-
-}
-
-
-/* =====================================================
-   MOBILE SIDEBAR
-===================================================== */
-
-function toggleSidebar() {
-
-  document
-    .getElementById("sidebar")
-    .classList.toggle("open");
-
-}
-
-
-function closeMobileSidebar() {
-
-  document
-    .getElementById("sidebar")
-    .classList.remove("open");
-
-}
-
-
-/* =====================================================
-   NOTIFICATIONS
-===================================================== */
-
-function showNotifications() {
-
-  showToast("3 ta yangi bildirishnoma mavjud.");
-
-}
-
-
-/* =====================================================
-   SETTINGS
-===================================================== */
-
-function openSettings() {
-
-  showToast("Sozlamalar bo‘limi keyingi versiyada.");
-
-}
-
-
-/* =====================================================
-   KEYBOARD
-===================================================== */
-
-function keyboardShortcuts(event) {
-
-  if (
-    (event.ctrlKey || event.metaKey) &&
-    event.key.toLowerCase() === "k"
-  ) {
-
-    event.preventDefault();
-
-    const search =
-      document.getElementById("globalSearch");
-
-    search.style.display = "flex";
-
-    search.focus();
-
-  }
-
-  if (event.key === "Escape") {
-
-    closeModal();
-
-  }
-
-}
-
-
-/* =====================================================
-   HELPERS
-===================================================== */
-
-function showToast(message) {
-
-  const toast = document.getElementById("toast");
-
-  toast.textContent = message;
-
-  toast.classList.add("show");
-
-  clearTimeout(window.toastTimer);
-
-  window.toastTimer = setTimeout(() => {
-
-    toast.classList.remove("show");
-
-  }, 3000);
-
-}
-
-
-function formatBytes(bytes) {
-
-  if (bytes === 0) return "0 Bytes";
-
-  const units = [
-    "Bytes",
-    "KB",
-    "MB",
-    "GB"
-  ];
-
-  const index =
-    Math.floor(
-      Math.log(bytes) / Math.log(1024)
+    document.body.classList.toggle(
+        "light"
     );
 
-  return (
-    parseFloat(
-      (bytes / Math.pow(1024, index)).toFixed(2)
-    ) +
-    " " +
-    units[index]
-  );
+
+    const theme =
+        document.body.classList.contains(
+            "light"
+        )
+            ? "light"
+            : "dark";
+
+
+    localStorage.setItem(
+        "kt_theme",
+        theme
+    );
 
 }
 
 
-function escapeHTML(text) {
+/* =========================================================
+   MOBILE MENU
+   ========================================================= */
 
-  const div = document.createElement("div");
+function setupMobileMenu() {
 
-  div.textContent = text;
+    document
+        .querySelectorAll(
+            "#menuToggle, .menu-toggle"
+        )
+        .forEach(button => {
 
-  return div.innerHTML;
+            button.addEventListener(
+                "click",
+                toggleMobileMenu
+            );
+
+        });
 
 }
 
 
-/* =====================================================
-   CLOSE MODAL WHEN CLICK OUTSIDE
-===================================================== */
+function toggleMobileMenu() {
 
-document.addEventListener("click", event => {
+    document.body.classList.toggle(
+        "sidebar-open"
+    );
 
-  const modal =
-    document.getElementById("modal");
+}
 
-  if (
-    event.target === modal
-  ) {
 
-    closeModal();
+function closeMobileMenu() {
 
-  }
+    document.body.classList.remove(
+        "sidebar-open"
+    );
 
-});
+}
+
+
+/* =========================================================
+   KEYBOARD SHORTCUTS
+   ========================================================= */
+
+function setupKeyboardShortcuts() {
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            /*
+            Ctrl + K
+            */
+
+            if (
+                event.ctrlKey &&
+                event.key.toLowerCase() === "k"
+            ) {
+
+                event.preventDefault();
+
+                const search =
+                    document.querySelector(
+                        "#globalSearch"
+                    );
+
+                if (search) {
+
+                    search.focus();
+
+                }
+
+            }
+
+
+            /*
+            Ctrl + N
+            */
+
+            if (
+                event.ctrlKey &&
+                event.key.toLowerCase() === "n"
+            ) {
+
+                event.preventDefault();
+
+                newTask();
+
+            }
+
+
+            /*
+            Escape
+            */
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                closeModal();
+
+                closeMobileMenu();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
+function updateDashboard() {
+
+    /*
+    Active AI
+    */
+
+    document
+        .querySelectorAll(
+            "[data-stat='agents']"
+        )
+        .forEach(element => {
+
+            element.textContent =
+                Object.keys(agents).length;
+
+        });
+
+
+    /*
+    Completed
+    */
+
+    document
+        .querySelectorAll(
+            "[data-stat='completed']"
+        )
+        .forEach(element => {
+
+            element.textContent =
+                tasks.filter(
+                    task =>
+                        task.status ===
+                        "Bajarildi"
+                ).length;
+
+        });
+
+
+    /*
+    In progress
+    */
+
+    document
+        .querySelectorAll(
+            "[data-stat='progress']"
+        )
+        .forEach(element => {
+
+            element.textContent =
+                tasks.filter(
+                    task =>
+                        task.status ===
+                        "Jarayonda"
+                ).length;
+
+        });
+
+}
+
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+function showToast(
+    message,
+    type = "info"
+) {
+
+    let container =
+        document.querySelector(
+            "#toastContainer"
+        );
+
+
+    if (!container) {
+
+        container =
+            document.createElement(
+                "div"
+            );
+
+        container.id =
+            "toastContainer";
+
+        container.className =
+            "toast-container";
+
+        document.body.appendChild(
+            container
+        );
+
+    }
+
+
+    const toast =
+        document.createElement(
+            "div"
+        );
+
+
+    toast.className =
+        `toast ${type}`;
+
+
+    toast.innerHTML = `
+
+        <span>
+            ${escapeHtml(message)}
+        </span>
+
+    `;
+
+
+    container.appendChild(
+        toast
+    );
+
+
+    setTimeout(
+        () => {
+
+            toast.classList.add(
+                "hide"
+            );
+
+            setTimeout(
+                () => toast.remove(),
+                300
+            );
+
+        },
+        3500
+    );
+
+}
+
+
+/* =========================================================
+   LOCAL STORAGE
+   ========================================================= */
+
+function saveTasks() {
+
+    localStorage.setItem(
+        "kt_tasks",
+        JSON.stringify(tasks)
+    );
+
+}
+
+
+function loadSavedData() {
+
+    try {
+
+        const savedTasks =
+            localStorage.getItem(
+                "kt_tasks"
+            );
+
+
+        if (savedTasks) {
+
+            tasks =
+                JSON.parse(
+                    savedTasks
+                );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Local storage error:",
+            error
+        );
+
+        tasks = [];
+
+    }
+
+
+    renderTasks();
+
+}
+
+
+/* =========================================================
+   FILE SIZE
+   ========================================================= */
+
+function formatFileSize(bytes) {
+
+    if (!bytes) return "0 B";
+
+
+    const units = [
+        "B",
+        "KB",
+        "MB",
+        "GB"
+    ];
+
+
+    const index =
+        Math.floor(
+            Math.log(bytes) /
+            Math.log(1024)
+        );
+
+
+    return (
+        bytes /
+        Math.pow(1024, index)
+    ).toFixed(1)
+    + " "
+    + units[index];
+
+}
+
+
+/* =========================================================
+   HTML ESCAPE
+   ========================================================= */
+
+function escapeHtml(text) {
+
+    if (
+        text === null ||
+        text === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        String(text);
+
+
+    return div.innerHTML;
+
+}
+
+
+/* =========================================================
+   GLOBAL FUNCTIONS
+   ========================================================= */
+
+window.selectAgent =
+    selectAgent;
+
+window.showPage =
+    showPage;
+
+window.newTask =
+    newTask;
+
+window.closeModal =
+    closeModal;
+
+window.createTask =
+    createTask;
+
+window.quickTask =
+    quickTask;
+
+window.sendMessage =
+    sendMessage;
+
+window.handleEnter =
+    handleEnter;
+
+window.toggleTheme =
+    toggleTheme;
+
+window.toggleMobileMenu =
+    toggleMobileMenu;
+
+window.closeMobileMenu =
+    closeMobileMenu;
+
+window.showToast =
+    showToast;
+
+
+/* =========================================================
+   START
+   ========================================================= */
+
+console.log(
+    "%cK-TUNGSTEN AI Virtual Office",
+    "font-size:20px;font-weight:bold;"
+);
+
+console.log(
+    "AI Director: ONLINE"
+);
+
+console.log(
+    "Agents:",
+    Object.keys(agents).length
+);
+````
